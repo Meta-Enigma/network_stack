@@ -1,9 +1,5 @@
 [toc]
 
-
-
-
-
 # SNMP
 
 Simple Network Management Protocol
@@ -33,9 +29,9 @@ SNMP是广泛应用于TCP/IP网络的网络管理标准协议，该协议能够�
 
 ## 基本组件
 
+![image-20230309155001768](https://user-images.githubusercontent.com/30233494/223978631-972dd0f6-6cb6-4910-9913-92a883cda27d.png)
 
 
-<img src="C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230309155001768.png" alt="image-20230309155001768" style="zoom:6%;" />
 
 NMS：Network Management System，管理者，运行在NMS服务器，采用SNMP协议管理监控设备
 
@@ -73,7 +69,8 @@ SNMP通信端点
 
 ### SNMPv3
 
-![image-20230309155422124](C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230309155422124.png)
+
+![image-20230309155422124](https://user-images.githubusercontent.com/30233494/223978690-fd0a1f13-9d16-43f2-a230-4970001730ab.png)
 
 
 
@@ -99,9 +96,8 @@ HMAC：Hash-based Message Authentication Code，验证信息完整性和身份�
 
 以NMS查询MIB节点sysContact值为例
 
+![image-20230309155513358](https://user-images.githubusercontent.com/30233494/223978738-bc1fc638-49f0-427f-a641-2172bb16b4ab.png)
 
-
-<img src="C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230309155513358.png" alt="image-20230309155513358" style="zoom:25%;" />
 
 1. NMS：向Agent发送不带安全参数的Get请求报文，向Agent获取Context EngineID、Context Name和安全参数（SNMP实体引擎的相关信息）。
 2. Agent：响应NMS的请求，并向NMS反馈请求的参数。
@@ -126,8 +122,9 @@ Agent运行在设备上，作为代理，对设备端MIB操作，完成NMS的指
 工作原理：将协议数据单元（SNMP GET）发送到响应SNMP的网络设备，用户通过网络监控工具可以跟踪所有通信过程，并从SNMP获取数据。
 
 
+![image-20230309160157510](https://user-images.githubusercontent.com/30233494/223978888-d2a88668-4908-4cfc-b8e4-31ae214ef32c.png)
 
-![image-20230309160157510](C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230309160157510.png)
+
 
 
 
@@ -174,7 +171,8 @@ http://www.net-snmp.org/docs/man/snmpd.html
 
 OID(Object Identifier)对象标识符，对应树中一个管理对象。树中每个分支均包含一个数字和名称，从根到该点的路径即为OID，比如system的OID是1.3.6.1.2.1.1，OID用于唯一标识管理对象在MIB树中位置，由SMI(Structure  of Management Information)保证OID不会冲突。
 
-<img src="C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230309155208511.png" alt="image-20230309155208511" style="zoom:20%;" />
+![image-20230309155208511](https://user-images.githubusercontent.com/30233494/223978933-80f934e6-223e-41a5-a7f4-a9992e2723d9.png)
+
 
 ## 分类
 
