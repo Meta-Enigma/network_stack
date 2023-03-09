@@ -26,7 +26,8 @@ Quagga是Zebra的继承版
 
 Quagga模型是一组独立守护进程，通过unix domain socket进行IPC。单个守护进程架构遵循event-driven模型。
 
-![image-20230306091306587](C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230306091306587.png)
+![image-20230306091306587](https://user-images.githubusercontent.com/30233494/223980450-767cacbe-d969-4dc4-9374-726601fea2df.png)
+
 
 图中显示3个协议进程，和1管理进程。其中ripd进程处理rip协议，ospfd处理ospf协议，进程可分布在同机器，每个进程通过监听不同端口来VTY连接。
 
@@ -132,9 +133,10 @@ thread_process_fd：侦听到描述符添加到ready链表
 - 加到ready队列
 ```
 
+![image-20230306101448307](https://user-images.githubusercontent.com/30233494/223980531-76cc1587-9f09-4cc3-a415-a2def1abfa82.png)
 
 
-![image-20230306101448307](C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230306101448307.png)
+
 
 
 
@@ -151,9 +153,8 @@ thread_process_fd：侦听到描述符添加到ready链表
 
 **执行逻辑**
 
+![image-20230306093444547](https://user-images.githubusercontent.com/30233494/223980598-42f36238-3ab3-4828-8117-64653623e703.png)
 
-
-<img src="C:\Users\M.E\AppData\Roaming\Typora\typora-user-images\image-20230306093444547.png" alt="image-20230306093444547" style="zoom: 20%;" />
 
 图中task boxes是当前待执行的任务，其他队列中的其他任务没有表示出来：
 
