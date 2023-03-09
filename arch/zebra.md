@@ -13,15 +13,16 @@ Quagga是Zebra的继承版
 > [Zebra – multi-server routing software](http://www.zebra.org/)
 
 > [Quagga](http://www.quagga.net/) is a routing software suite, providing implementations of OSPFv2, OSPFv3, RIP v1 and v2, RIPng and BGP-4 for Unix platforms, particularly FreeBSD, Linux, Solaris and NetBSD. Quagga is a fork of [GNU Zebra](http://www.zebra.org/) which was developed by Kunihiro Ishiguro.
->
-> 
 
 
 
 - 提供类Cisco命令行的分级多用户命令解析引擎，负责对访问的安全验证、数据缓冲、命令解析、模式切换和命令调用
+
 - 提供整套基于tcp/ip网络的路由协议的支持(ripv1,ripv2,bgp等)
+
 - 对程序架构组织，便于剥离实现专用cli程序，或提供其中一类数据结构借助thread机制实现复杂状态机
-- 
+
+  
 
 Quagga模型是一组独立守护进程，通过unix domain socket进行IPC。单个守护进程架构遵循event-driven模型。
 
