@@ -416,5 +416,28 @@ http://blog.chinaunix.net/uid-23097562-id-2550089.html
 
 
 
+## known issues
 
+### RFC1213 IfInOctets truncating
+
+RFC1213规定
+
+```
+ifInOctets OBJECT-TYPE 
+		SYNTAX  Counter
+        ACCESS  read-only
+```
+
+其中counter的定义在RFC1155，是**32bit**数值
+
+>This application-wide type represents a non-negative integer whichThis application-wide type represents a non-negative integer which monotonically increases until it reaches a maximum value, when it wraps around and starts increasing again from zero.  This memo specifies a maximum value of 2^32-1 (4294967295 decimal) for counters.
+
+[RFC 1155: Structure and identification of management information for TCP/IP-based internets (rfc-editor.org)](https://www.rfc-editor.org/rfc/rfc1155)
+
+所以，会出现以下状况，sdk统计ifInOctets值为9174975360，snmp agent ifTable load加载时，数值也是9174975360。但是mibbrowser和snmpget显示却是截断的。
+
+```
+[root@YZOS /kgmicro/usrfs]# ./snmpget -v 2c -c public 127.0.0.1 1.3.6.1.2.1.2.2.1.10.3
+IF-MIB::ifInOctets.3 = Counter32: 585040768
+```
 
