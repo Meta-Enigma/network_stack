@@ -1,5 +1,7 @@
 
 
+[[_TOC_]]
+
 # 背景
 
 Access Control List，一种报文过滤技术，由一条或多条规则组成的集合。
@@ -137,8 +139,8 @@ group是逻辑概念，芯片底层，依然按照entry(rule)下发顺序匹配�
 寄存器说明**DsMemSrcPort**：
 
 - l2AclEn：使能l2 acl
-- l2AclHiPrio：在label场景（port和vlan label），置位按照port label(l2 label)，否则走vlan label(l3 label)
-- ipv4ForceMacKey：使ip报文匹配l2 ACL
+- l2AclHiPrio：在label场景（port和vlan label），置位查询port label(l2 label)对应规则，否则查询vlan label(l3 label)
+- ipv4ForceMacKey：强制ip报文匹配l2 ACL
 - l2AclLabel：分类标签，port和vlan group二选一，label全局唯一。
 
 
@@ -159,21 +161,13 @@ L2 ACL规则： 精确匹配源MAC_A，丢弃。即DsTcamAclQosMacKey中的字�
 
 ## 应用场景
 
-### label使用
-
-```
-
-KGXX> enable
-KGXX# configure terminal 
-KGXX(config)# configure acl 
-KGXX(config-acl)#acl port 1/2 label 2
-```
-
-
-
 ### 错误mac过滤
 
+对于源MAC是组播或广播报文，不予转发。
 
+根据802.3标准，MAC地址最高字节的最低bit位是**组播地址标识位**，即该bit位1时，表示该地址是组播mac地址。广播mac地址可以当做是组播的特殊形式。
+
+思路：设置全局acl规则，精确匹配源mac中组播地地址标识位，丢弃。
 
 ```
 KGXX(config-acl)#acl port 1/2 enable 
@@ -184,6 +178,21 @@ KGXX(config-acl)#acl install entry 1
 KGXX(config-acl)#acl install group 1
 ```
 
+寄存器读取
+
+```
+#index从0开始，1则代表第2个端口
+kgsdk table-read DsMemSrcPort 1
+```
+
+
+
+**测试用例**
+
+1. 正常源mac：不同vlan、ip报文、非ip报文  —》通行
+2. 广播源mac：不同vlan、ip报文、非ip报文  —》丢弃
+3. 组播源mac：不同vlan、ip报文、非ip报文  —》丢弃
+
 
 
 ### 端口mac绑定
@@ -192,14 +201,55 @@ KGXX(config-acl)#acl install group 1
 KGXX(config-acl)#acl port 1/2 enable 
 KGXX(config-acl)#acl port 1/2 forcemac enable 
 KGXX(config-acl)#acl add group 10 port 2
-KGXX(config-acl)#acl mac add entry 10 group 10 da 0000.0000.0000 mask 0000.0000.0000 sa 0000.0012.3010 mask ffff.ffff.ffff vlan 2 mask ffff discard 0
+KGXX(config-acl)#acl port 1/2 label 2
+KGXX(config-acl)#acl mac add entry 1 group 10 da 0000.0000.0000 mask 0000.0000.0000 sa 0000.0012.3010 mask ffff.ffff.ffff vlan 2 mask ffff discard 0
+KGXX(config-acl)#acl mac add entry 2 group 10 da 0000.0000.0000 mask 0000.0000.0000 sa 0000.0000.0000 mask 0000.0000.0000 vlan 0 mask 0000 discard 1
 KGXX(config-acl)#acl add group 1 global
-KGXX(config-acl)#acl mac add entry 1 group 1 da 0000.0000.0000 mask 0000.0000.0000 sa 0000.0000.0000 mask 0000.0000.0000 vlan 0 mask 0000 discard 1
-KGXX(config-acl)#acl install entry 10
-KGXX(config-acl)#acl install group 10
+KGXX(config-acl)#acl mac add entry 3 group 1 da 0000.0000.0000 mask 0000.0000.0000 sa 0100.0000.0000 mask 0100.0000.0000 vlan 0 mask 0000 discard 1
 KGXX(config-acl)#acl install entry 1
+KGXX(config-acl)#acl install entry 2
+KGXX(config-acl)#acl install entry 3
+KGXX(config-acl)#acl install group 10
 KGXX(config-acl)#acl install group 1
 ```
+
+
+
+**规则设计思路**
+
+为避免规则影响其他端口，使用label功能，即对端口进行标记，那么acl查询只会匹配相同label的规则。
+
+1. [label rule]精确匹配MAC、VLAN
+2. [label rule]丢弃其他报文
+3. [global rule]丢弃错误帧（源mac为组播或广播）【可选】【兼容上一项】
+
+
+
+**Note：下发顺序，即为acl查找顺序**。
+
+
+
+**测试用例**
+
+1. 绑定MAC：
+   - 绑定vlan：
+     - 绑定port：通行
+     - 非绑定port：丢弃
+   - 非绑定vlan：丢弃
+2. 非绑定MAC：丢弃
+
+
+
+### label使用
+
+```
+KGXX> enable
+KGXX# configure terminal 
+KGXX(config)# configure acl 
+KGXX(config-acl)#acl port 1/2 label 2
+```
+
+
 
 
 
