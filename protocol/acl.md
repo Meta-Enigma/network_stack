@@ -117,7 +117,9 @@ Access Control List，一种报文过滤技术，由一条或多条规则组成�
 
 ### 匹配顺序
 
-group是逻辑概念，芯片底层，依然按照entry(rule)下发顺序匹配。可以通过设置entry的优先级，暂不支持。
+目前，sdk在逻辑上划分了group，芯片底层，依然按照entry(rule)下发顺序匹配。可以通过设置entry的优先级，暂不支持。
+
+group分为global、port和vlan。其中global可简单理解为全局作用，port和vlan则会作用到对应有相同label的端口上。
 
 
 
@@ -132,16 +134,17 @@ group是逻辑概念，芯片底层，依然按照entry(rule)下发顺序匹配�
     - 未配置L3 acl enable或无规则，则优先匹配L3 ACL，即默认处理（目前放行）
     - 配置forcemac，强行匹配L2 ACL
   - 报文无ip信息，则会匹配L2 ACL
-- 
 
 
+
+### L2 ACL 说明
 
 寄存器说明**DsMemSrcPort**：
 
 - l2AclEn：使能l2 acl
 - l2AclHiPrio：在label场景（port和vlan label），置位查询port label(l2 label)对应规则，否则查询vlan label(l3 label)
 - ipv4ForceMacKey：强制ip报文匹配l2 ACL
-- l2AclLabel：分类标签，port和vlan group二选一，label全局唯一。
+- l2AclLabel：分类标签，port label，匹配port group中的规则。
 
 
 
@@ -161,6 +164,46 @@ L2 ACL规则： 精确匹配源MAC_A，丢弃。即DsTcamAclQosMacKey中的字�
 
 ## 应用场景
 
+
+
+### ACL相关命令解释
+
+**Enable**
+
+```
+## enable L2 acl for <port>
+acl port <port> enable 
+
+## force l3 packets to search L2 acl rules
+acl port <port> forcemac enable
+
+## create global group 1
+acl add group 1 global
+
+## add acl rule to group 1
+acl mac add entry 1 group 1 xxxxxxxxx
+
+## install entry 1 to hardware
+acl install entry 1 
+
+## install group to hardware
+acl install group 1
+```
+
+**Disable**
+
+```
+acl port <port> enable 
+acl port <port> forcemac enable
+acl uninstall entry 1 
+acl uninstall entry 1
+acl uninstall group 1
+```
+
+
+
+
+
 ### 错误mac过滤
 
 对于源MAC是组播或广播报文，不予转发。
@@ -177,6 +220,16 @@ KGXX(config-acl)#acl mac add entry 1 group 1 da 0000.0000.0000 mask 0000.0000.00
 KGXX(config-acl)#acl install entry 1 
 KGXX(config-acl)#acl install group 1
 ```
+
+**配置说明**：
+
+- da: 目的mac
+- sa：源mac
+- vlan：报文vlan
+- mask：掩码，如果bit为1，则代表对应mac地址/vlan值的对应bit也置位才会匹配。比如da全0，mask全0，则代表通配所有mac地址。如果mask全f，则代表精确匹配对应的mac/vlan。
+- discard：0代表permit，1代表deny
+
+
 
 寄存器读取
 
